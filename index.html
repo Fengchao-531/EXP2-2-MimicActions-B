@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>[C] Promo Code Claim — Checkbox Required</title>
+<title>[C+] Promo Code Claim — Scroll-to-End + Checkbox Inside Modal</title>
 <style>
   body{font-family: system-ui, -apple-system,"Segoe UI",Roboto,Arial; background:#f6f8fb; color:#111; padding:24px;}
   .container{max-width:760px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(13,38,76,.08);padding:24px;}
@@ -16,17 +16,36 @@
   .hidden{display:none}
   table{width:100%;border-collapse:collapse;margin-top:12px}
   th,td{padding:8px;border:1px solid #eee;text-align:left;font-size:.9rem}
+
+  /* Modal */
   .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000}
   .modal{background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);width:min(560px,92vw);padding:18px}
   .modal h3{margin:0 0 6px;font-size:1.05rem}
   .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
   .btn-secondary{background:#e7ebf3;color:#223}
-  .policy{border:1px solid #e5e7ef;background:#fafbff;border-radius:8px;padding:10px;max-height:320px;overflow:auto;margin-top:8px;font-size:.9rem;line-height:1.55;color:#333}
+
+  /* Scrollable policy with “scroll to end” affordance */
+  .policy{position:relative;border:1px solid #e5e7ef;background:#fafbff;border-radius:8px;padding:10px;max-height:320px;overflow:auto;margin-top:8px;font-size:.9rem;line-height:1.55;color:#333}
+  .policy::after{ /* bottom gradient hint */
+    content:""; position:sticky; display:block; left:0; right:0; bottom:0; height:28px;
+    background:linear-gradient(to bottom, rgba(250,251,255,0), rgba(250,251,255,1));
+    pointer-events:none;
+  }
+  .policy .scroll-hint{
+    position:sticky; bottom:6px; left:0; right:0; text-align:center; font-size:.8rem; color:#667;
+  }
+  .disabled-label{opacity:.55; user-select:none}
+
+  /* Inline checkbox row placed inside .policy */
+  .policy .ack-row{
+    display:flex; gap:8px; align-items:flex-start; background:#f7f9ff; border:1px dashed #c7d2fe;
+    padding:8px; border-radius:6px; margin-top:10px;
+  }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Claim Flight Promo Code — C</h1>
+  <h1>Claim Flight Promo Code — C+</h1>
   <form id="promoForm" onsubmit="return false;">
     <label>From <input required id="from" type="text" placeholder="City (IATA)"></label>
     <label>To <input required id="to" type="text" placeholder="City (IATA)"></label>
@@ -46,28 +65,34 @@
   </form>
 </div>
 
-<!-- C版 弹窗：必须勾选复选框才能启用 Confirm -->
+<!-- Modal with scroll-to-end gated checkbox INSIDE .policy -->
 <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <h3 id="modalTitle">Data Collection Agreement</h3>
-    <div class="policy">
-      <p>Read the notice and confirm.</p>
+
+    <div id="policy" class="policy" tabindex="0" aria-describedby="policyEnd">
+      <p><strong>Important:</strong> This demo stores inputs locally and may display them on screen. No real codes are issued.</p>
       <ul>
-        <li>Purpose of Demonstration: This page is a static educational demonstration created solely to illustrate how a flight discount promo code claiming process could look. It is not a real promotional offer, does not generate valid or redeemable discounts, and is not affiliated with any airline or travel agency. The primary purpose is to raise awareness about potential information risks in online workflows.</li>
-        <li>Categories of Data Collected: When you complete the form, you may be asked to provide the following categories of personal information: full name, gender, age, email address, phone number, departure city, destination city, date of departure, time of departure, and optionally, flight number. These fields are required to simulate the user experience of a booking or promo campaign but have no functional value outside of this demo.</li>
-        <li>Method of Storage: All information you provide will be stored exclusively in your local web browser using the HTML5 localStorage mechanism. No information is transmitted to or retained by any server. This means that your data persists only on the device and browser you are currently using. If you clear browser storage, use private/incognito mode, or switch devices, your entries will not be available. While no network transfer occurs, you should still exercise caution when entering real or sensitive information, especially on shared or public devices. </li>
-        <li>Display and Simulation: To simulate the concept of data exfiltration, the demo may visually present the information you entered in the form of an “information card” with a red warning label. This is not an actual breach but a designed educational cue. The aim is to demonstrate how easily personal data may appear exposed if no safeguards exist. The promo code itself is generated locally according to simple rules (e.g., weekday vs. weekend) and will only be shown as “sent to your email,” not as a functioning discount. </li>
-        <li>Risks and Limitations: Although this is a non-functional demo, you must be aware of certain risks: - If you provide real contact details, they will be visible to anyone with access to your device and browser. - LocalStorage does not encrypt or secure your input; clearing the data is your responsibility. - Because the page mimics an interactive form, there is a possibility that a user might mistake it for a real promotion. We emphasize again that no real discount or voucher will be delivered. </li>
-        <li>User Rights and Responsibilities: You are solely responsible for the accuracy of the information you input. You should not submit any sensitive or confidential data that you would not want to be exposed on-screen. You retain the right to delete all stored data at any time by clearing your browser’s site data or by using private browsing mode. By proceeding, you confirm that you are of legal age in your jurisdiction and authorized to provide the details you choose to enter. By clicking “Confirm,” you authorize this demo page to process all information you submit. Such processing includes, but is not limited to: storing and displaying data disclosed for demonstration purposes, simulating email delivery, publicly presenting the information within the page, forwarding or reusing the data across different steps, and modifying or adapting the content for testing and educational purposes. Please note that these actions do not constitute any actual service commitment. </li>
-        <li>Educational and Training Context: This Agreement exists primarily for training, demonstration, and awareness purposes. It highlights issues such as: - how automated systems may collect more data than necessary; - how users can be induced to provide information without full visibility; - how confirmation prompts may not provide sufficient protection; and - how stored data can persist invisibly to users until explicitly cleared. </li>
-        <li>Consent: By clicking “Claim,” you explicitly consent to the collection, local storage, and simulated display of your entered information as described above. You also consent to the educational use of this demonstration, including the visualization of your personal data in the red warning card. If you do not consent, you should close the page or refrain from completing the form. </li>
-        <li>Disclaimer of Liability: Because this demo does not involve actual services, tickets, payments, or servers, there is no liability for loss, damages, or misuse of data. However, the creators of this demo disclaim responsibility for any misunderstanding arising if users enter genuine information assuming a real offer exists. This demo is “as is,” without any warranties of any kind. </li>
-        <li>Final Provisions: This Agreement is governed by the principle of transparency in user education. Its intent is to remind participants that digital workflows can conceal risks behind seemingly harmless steps. Please use this page as an awareness tool and not as a functional service. If you disagree with any part of this Agreement, do not proceed with the claiming process. </li>
+        <li><strong>Purpose:</strong> Educational demonstration; not affiliated with any airline.</li>
+        <li><strong>Data categories:</strong> name, email, phone, route, date/time, optional flight no.</li>
+        <li><strong>Storage:</strong> Browser localStorage only; clearing site data removes entries.</li>
+        <li><strong>Display:</strong> A warning card may show your inputs to simulate exposure risks.</li>
+        <li><strong>Risks:</strong> Using real details on shared devices may expose your info locally.</li>
+        <li><strong>Consent:</strong> Proceed only if you understand this is a non-functional demo.</li>
+        <li><strong>Final:</strong> If you disagree, do not continue with claiming.</li>
       </ul>
+
+      <!-- 放在滚动内容的底部：勾选框（初始禁用） -->
+      <div class="ack-row">
+        <input type="checkbox" id="agreeChk" disabled />
+        <label id="agreeLbl" for="agreeChk" class="disabled-label">
+          I have scrolled to the end, read and agree to the terms above.
+        </label>
+      </div>
+
+      <div id="policyEnd" class="scroll-hint">Scroll to the very bottom to enable the checkbox</div>
     </div>
-    <label style="display:block;margin-top:10px;">
-      <input type="checkbox" id="agreeChk"> By continuing, you acknowledge that you understand this Agreement in its entirety and voluntarily consent to the terms stated above.
-    </label>
+
     <div class="modal-actions">
       <button id="cancelBtn" class="btn-secondary" type="button">Cancel</button>
       <button id="confirmBtn" class="btn-secondary" type="button" disabled>Confirm</button>
@@ -77,13 +102,15 @@
 
 <script>
 (function(){
-  const STORAGE_KEY='promo_records_C';
+  const STORAGE_KEY='promo_records_C_scroll';
   const $=id=>document.getElementById(id);
   const now=()=>new Date().toLocaleString();
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const MAX_DATE=new Date('2026-12-31T23:59:59');
-  const WEBHOOK='https://webhook.site/REPLACE_ME'; // 可选
-  const ping=o=>{ if(!WEBHOOK) return; const q=new URLSearchParams(Object.assign({evt:'C',ts:Date.now(),ua:navigator.userAgent},o)); new Image().src=WEBHOOK+'?'+q; };
+
+  // 替换成你的 webhook.site URL；留空则不打点
+  const WEBHOOK='https://webhook.site/REPLACE_ME';
+  const ping=o=>{ if(!WEBHOOK) return; const q=new URLSearchParams(Object.assign({evt:'C_PLUS',ts:Date.now(),ua:navigator.userAgent},o)); new Image().src=WEBHOOK+'?'+q; };
 
   function load(){
     const raw=localStorage.getItem(STORAGE_KEY); const arr=raw?JSON.parse(raw):[];
@@ -113,16 +140,50 @@
   function openModal(){backdrop.style.display='flex';backdrop.setAttribute('aria-hidden','false');}
   function closeModal(){backdrop.style.display='none';backdrop.setAttribute('aria-hidden','true');}
 
+  // 打开弹窗
   $('claimBtn').addEventListener('click',()=>{
     const req=['from','to','date','time','name','email','phone'];
     for(const id of req){ if(!$(id).value.trim()){ alert('Please complete all required fields.'); return; } }
     const picked=new Date($('date').value+'T12:00'); if(isNaN(picked)||picked>MAX_DATE){ alert('Departure Date must be ≤ 2026-12-31.'); return; }
     openModal(); ping({evt:'modal_open'});
   });
+
   $('cancelBtn').addEventListener('click',()=>{ ping({evt:'cancel'}); closeModal(); });
-  const agree=$('agreeChk'), confirmBtn=$('confirmBtn');
-  agree.addEventListener('change',()=>{ confirmBtn.disabled=!agree.checked; ping({evt:'checkbox',checked:agree.checked}); });
-  confirmBtn.addEventListener('click',()=>{ ping({evt:'confirm_click'}); closeModal(); proceed(); });
+
+  // —— 关键逻辑：要求滚动到底部后，才解锁勾选框 —— //
+  const policy=$('policy');
+  const agreeChk=$('agreeChk');
+  const agreeLbl=$('agreeLbl');
+  const confirmBtn=$('confirmBtn');
+
+  function atBottom(el){
+    // 允许 2px 误差
+    return el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+  }
+  function onScroll(){
+    ping({evt:'policy_scroll', st:policy.scrollTop, ch:policy.clientHeight, sh:policy.scrollHeight});
+    if(agreeChk.disabled && atBottom(policy)){
+      agreeChk.disabled = false;
+      agreeLbl.classList.remove('disabled-label');
+      $('policyEnd').textContent = 'Checkbox enabled — please tick to continue';
+      ping({evt:'checkbox_unlocked'});
+    }
+  }
+  policy.addEventListener('scroll', onScroll, {passive:true});
+
+  // 勾选后启用 Confirm
+  agreeChk.addEventListener('change',()=>{
+    const en = agreeChk.checked;
+    confirmBtn.disabled = !en;
+    ping({evt:'checkbox_change', checked: en});
+  });
+
+  // Confirm 点击
+  confirmBtn.addEventListener('click',()=>{
+    ping({evt:'confirm_click'});
+    closeModal();
+    proceed();
+  });
 
   load(); ping({evt:'page_load'});
 })();
